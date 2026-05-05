@@ -1,0 +1,311 @@
+newman
+
+Integración Claustrum - Horarios guardados
+
+Iteration 1/3
+
+❏ 01 Auth
+↳ Login con Supabase Auth
+  POST https://jxzkhfclcdpcgtkpyxyk.supabase.co/auth/v1/token?grant_type=password [200 OK, 3.13kB, 526ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 200
+  ✓  Token de acceso existe
+
+❏ 02 Catálogo académico
+↳ Consultar universidad
+  GET https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/v_universities?select=id,name,short_name&id=eq.1 [200 OK, 1.07kB, 191ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 200
+  ✓  Universidad existe
+
+↳ Consultar campus por universidad
+  POST https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/rpc/get_campuses_for_university [200 OK, 1.36kB, 188ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 200
+  ✓  Campus configurado está presente
+
+↳ Consultar carreras por campus
+  POST https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/rpc/get_academic_units_for_campus [200 OK, 5.55kB, 264ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 200
+  ✓  Carrera configurada está presente
+
+↳ Consultar planes por carrera
+  POST https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/rpc/get_study_plans_for_academic_unit [200 OK, 3.07kB, 190ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 200
+  ✓  Plan configurado está presente
+
+↳ Consultar períodos académicos
+  POST https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/rpc/get_active_academic_terms [200 OK, 2.61kB, 253ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 200
+  ✓  Período configurado está presente
+
+❏ 03 Horarios guardados
+↳ Consultar cursos y grupos disponibles
+  POST https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/rpc/get_schedule_courses [200 OK, 127.85kB, 381ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 200
+  ✓  Lista de cursos no vacía
+  ✓  Existe al menos un grupo disponible
+  ✓  Contrato de curso y grupo
+
+↳ Guardar horario válido
+  POST https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/rpc/save_user_schedule [200 OK, 1.1kB, 297ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 200
+  ✓  Horario guardado tiene id
+
+↳ Consultar horario guardado
+  GET https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/saved_schedule?select=*&id=eq.34 [200 OK, 1.21kB, 178ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 200
+  ✓  Horario persiste
+
+↳ Consultar grupos del horario guardado
+  POST https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/rpc/get_user_saved_schedule_group_lookups [200 OK, 974B, 179ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 200
+  ✓  Horario tiene grupos guardados
+
+↳ Eliminar horario guardado
+  DELETE https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/saved_schedule?id=eq.34 [204 No Content, 823B, 173ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 204 or 200
+
+↳ Verificar eliminación de horario
+  GET https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/saved_schedule?select=id&id=eq.34 [200 OK, 939B, 172ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 200
+  ✓  Horario eliminado no aparece en consulta
+
+❏ 04 Pruebas negativas
+↳ Guardar horario sin autenticación
+  POST https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/rpc/save_user_schedule [403 Forbidden, 983B, 178ms]
+  ✓  Response time below 5000 ms
+  ✓  Request is rejected
+
+↳ Guardar horario con nombre vacío
+  POST https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/rpc/save_user_schedule [400 Bad Request, 976B, 172ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 400
+  ✓  Mensaje menciona nombre
+
+↳ Guardar horario con grupo inexistente
+  POST https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/rpc/save_user_schedule [400 Bad Request, 1.04kB, 280ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 400
+  ✓  Mensaje menciona grupos válidos
+
+Iteration 2/3
+
+❏ 01 Auth
+↳ Login con Supabase Auth
+  POST https://jxzkhfclcdpcgtkpyxyk.supabase.co/auth/v1/token?grant_type=password [200 OK, 3.14kB, 326ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 200
+  ✓  Token de acceso existe
+
+❏ 02 Catálogo académico
+↳ Consultar universidad
+  GET https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/v_universities?select=id,name,short_name&id=eq.1 [200 OK, 1.07kB, 323ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 200
+  ✓  Universidad existe
+
+↳ Consultar campus por universidad
+  POST https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/rpc/get_campuses_for_university [200 OK, 1.36kB, 279ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 200
+  ✓  Campus configurado está presente
+
+↳ Consultar carreras por campus
+  POST https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/rpc/get_academic_units_for_campus [200 OK, 5.54kB, 192ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 200
+  ✓  Carrera configurada está presente
+
+↳ Consultar planes por carrera
+  POST https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/rpc/get_study_plans_for_academic_unit [200 OK, 3.07kB, 247ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 200
+  ✓  Plan configurado está presente
+
+↳ Consultar períodos académicos
+  POST https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/rpc/get_active_academic_terms [200 OK, 2.6kB, 240ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 200
+  ✓  Período configurado está presente
+
+❏ 03 Horarios guardados
+↳ Consultar cursos y grupos disponibles
+  POST https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/rpc/get_schedule_courses [200 OK, 127.85kB, 311ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 200
+  ✓  Lista de cursos no vacía
+  ✓  Existe al menos un grupo disponible
+  ✓  Contrato de curso y grupo
+
+↳ Guardar horario válido
+  POST https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/rpc/save_user_schedule [200 OK, 1.1kB, 177ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 200
+  ✓  Horario guardado tiene id
+
+↳ Consultar horario guardado
+  GET https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/saved_schedule?select=*&id=eq.36 [200 OK, 1.21kB, 177ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 200
+  ✓  Horario persiste
+
+↳ Consultar grupos del horario guardado
+  POST https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/rpc/get_user_saved_schedule_group_lookups [200 OK, 974B, 282ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 200
+  ✓  Horario tiene grupos guardados
+
+↳ Eliminar horario guardado
+  DELETE https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/saved_schedule?id=eq.36 [204 No Content, 823B, 169ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 204 or 200
+
+↳ Verificar eliminación de horario
+  GET https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/saved_schedule?select=id&id=eq.36 [200 OK, 939B, 180ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 200
+  ✓  Horario eliminado no aparece en consulta
+
+❏ 04 Pruebas negativas
+↳ Guardar horario sin autenticación
+  POST https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/rpc/save_user_schedule [403 Forbidden, 984B, 172ms]
+  ✓  Response time below 5000 ms
+  ✓  Request is rejected
+
+↳ Guardar horario con nombre vacío
+  POST https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/rpc/save_user_schedule [400 Bad Request, 976B, 170ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 400
+  ✓  Mensaje menciona nombre
+
+↳ Guardar horario con grupo inexistente
+  POST https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/rpc/save_user_schedule [400 Bad Request, 1.04kB, 282ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 400
+  ✓  Mensaje menciona grupos válidos
+
+Iteration 3/3
+
+❏ 01 Auth
+↳ Login con Supabase Auth
+  POST https://jxzkhfclcdpcgtkpyxyk.supabase.co/auth/v1/token?grant_type=password [200 OK, 3.14kB, 329ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 200
+  ✓  Token de acceso existe
+
+❏ 02 Catálogo académico
+↳ Consultar universidad
+  GET https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/v_universities?select=id,name,short_name&id=eq.1 [200 OK, 1.07kB, 283ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 200
+  ✓  Universidad existe
+
+↳ Consultar campus por universidad
+  POST https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/rpc/get_campuses_for_university [200 OK, 1.36kB, 175ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 200
+  ✓  Campus configurado está presente
+
+↳ Consultar carreras por campus
+  POST https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/rpc/get_academic_units_for_campus [200 OK, 5.56kB, 173ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 200
+  ✓  Carrera configurada está presente
+
+↳ Consultar planes por carrera
+  POST https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/rpc/get_study_plans_for_academic_unit [200 OK, 3.07kB, 173ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 200
+  ✓  Plan configurado está presente
+
+↳ Consultar períodos académicos
+  POST https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/rpc/get_active_academic_terms [200 OK, 2.6kB, 237ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 200
+  ✓  Período configurado está presente
+
+❏ 03 Horarios guardados
+↳ Consultar cursos y grupos disponibles
+  POST https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/rpc/get_schedule_courses [200 OK, 127.85kB, 311ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 200
+  ✓  Lista de cursos no vacía
+  ✓  Existe al menos un grupo disponible
+  ✓  Contrato de curso y grupo
+
+↳ Guardar horario válido
+  POST https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/rpc/save_user_schedule [200 OK, 1.1kB, 172ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 200
+  ✓  Horario guardado tiene id
+
+↳ Consultar horario guardado
+  GET https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/saved_schedule?select=*&id=eq.38 [200 OK, 1.21kB, 178ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 200
+  ✓  Horario persiste
+
+↳ Consultar grupos del horario guardado
+  POST https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/rpc/get_user_saved_schedule_group_lookups [200 OK, 973B, 179ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 200
+  ✓  Horario tiene grupos guardados
+
+↳ Eliminar horario guardado
+  DELETE https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/saved_schedule?id=eq.38 [204 No Content, 822B, 177ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 204 or 200
+
+↳ Verificar eliminación de horario
+  GET https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/saved_schedule?select=id&id=eq.38 [200 OK, 947B, 181ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 200
+  ✓  Horario eliminado no aparece en consulta
+
+❏ 04 Pruebas negativas
+↳ Guardar horario sin autenticación
+  POST https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/rpc/save_user_schedule [403 Forbidden, 984B, 175ms]
+  ✓  Response time below 5000 ms
+  ✓  Request is rejected
+
+↳ Guardar horario con nombre vacío
+  POST https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/rpc/save_user_schedule [400 Bad Request, 975B, 173ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 400
+  ✓  Mensaje menciona nombre
+
+↳ Guardar horario con grupo inexistente
+  POST https://jxzkhfclcdpcgtkpyxyk.supabase.co/rest/v1/rpc/save_user_schedule [400 Bad Request, 1.04kB, 273ms]
+  ✓  Response time below 5000 ms
+  ✓  Status code is 400
+  ✓  Mensaje menciona grupos válidos
+
+┌─────────────────────────┬────────────────────┬────────────────────┐
+│                         │           executed │             failed │
+├─────────────────────────┼────────────────────┼────────────────────┤
+│              iterations │                  3 │                  0 │
+├─────────────────────────┼────────────────────┼────────────────────┤
+│                requests │                 45 │                  0 │
+├─────────────────────────┼────────────────────┼────────────────────┤
+│            test-scripts │                 90 │                  0 │
+├─────────────────────────┼────────────────────┼────────────────────┤
+│      prerequest-scripts │                 45 │                  0 │
+├─────────────────────────┼────────────────────┼────────────────────┤
+│              assertions │                135 │                  0 │
+├─────────────────────────┴────────────────────┴────────────────────┤
+│ total run duration: 11.2s                                         │
+├───────────────────────────────────────────────────────────────────┤
+│ total data received: 415.81kB (approx)                            │
+├───────────────────────────────────────────────────────────────────┤
+│ average response time: 229ms [min: 169ms, max: 526ms, s.d.: 73ms] │
+└───────────────────────────────────────────────────────────────────┘

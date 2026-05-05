@@ -1,0 +1,157 @@
+{
+  "info": {
+    "name": "Integración Claustrum - Horarios guardados",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Pruebas de integración contra Supabase REST API para el flujo de selección, guardado, consulta y eliminación de horarios en Claustrum."
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.request.headers.upsert({ key: 'apikey', value: pm.environment.get('supabase_publishable_key') });",
+          "pm.request.headers.upsert({ key: 'Content-Type', value: 'application/json' });"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test('Response time below 5000 ms', function () {",
+          "  pm.expect(pm.response.responseTime).to.be.below(5000);",
+          "});"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "01 Auth",
+      "item": [
+        {
+          "name": "Login con Supabase Auth",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "var body = pm.response.json();",
+                  "pm.test('Token de acceso existe', function () { pm.expect(body.access_token).to.be.a('string').and.not.empty; });",
+                  "pm.environment.set('access_token', body.access_token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{claustrum_email}}\",\n  \"password\": \"{{claustrum_pass}}\"\n}"
+            },
+            "url": {
+              "raw": "{{supabase_url}}/auth/v1/token?grant_type=password",
+              "host": ["{{supabase_url}}"],
+              "path": ["auth", "v1", "token"],
+              "query": [{ "key": "grant_type", "value": "password" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 Catálogo académico",
+      "item": [
+        {
+          "name": "Consultar universidad",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status code is 200', function () { pm.response.to.have.status(200); });", "var data = pm.response.json();", "pm.test('Universidad existe', function () { pm.expect(data).to.be.an('array').that.is.not.empty; pm.expect(data[0]).to.have.property('id', Number(pm.environment.get('university_id'))); });"] } }],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": { "raw": "{{supabase_rest_url}}/v_universities?select=id,name,short_name&id=eq.{{university_id}}", "host": ["{{supabase_rest_url}}"], "path": ["v_universities"], "query": [{ "key": "select", "value": "id,name,short_name" }, { "key": "id", "value": "eq.{{university_id}}" }] }
+          }
+        },
+        {
+          "name": "Consultar campus por universidad",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status code is 200', function () { pm.response.to.have.status(200); });", "var data = pm.response.json();", "pm.test('Campus configurado está presente', function () { pm.expect(data.some(c => c.id === Number(pm.environment.get('campus_id')))).to.equal(true); });"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }], "body": { "mode": "raw", "raw": "{\n  \"p_university_id\": {{university_id}}\n}" }, "url": { "raw": "{{supabase_rest_url}}/rpc/get_campuses_for_university", "host": ["{{supabase_rest_url}}"], "path": ["rpc", "get_campuses_for_university"] } }
+        },
+        {
+          "name": "Consultar carreras por campus",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status code is 200', function () { pm.response.to.have.status(200); });", "var data = pm.response.json();", "pm.test('Carrera configurada está presente', function () { pm.expect(data.some(c => c.id === Number(pm.environment.get('career_id')))).to.equal(true); });"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }], "body": { "mode": "raw", "raw": "{\n  \"p_campus_id\": {{campus_id}}\n}" }, "url": { "raw": "{{supabase_rest_url}}/rpc/get_academic_units_for_campus", "host": ["{{supabase_rest_url}}"], "path": ["rpc", "get_academic_units_for_campus"] } }
+        },
+        {
+          "name": "Consultar planes por carrera",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status code is 200', function () { pm.response.to.have.status(200); });", "var data = pm.response.json();", "pm.test('Plan configurado está presente', function () { pm.expect(data.some(p => p.id === Number(pm.environment.get('study_plan_id')))).to.equal(true); });"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }], "body": { "mode": "raw", "raw": "{\n  \"p_academic_unit_id\": {{career_id}}\n}" }, "url": { "raw": "{{supabase_rest_url}}/rpc/get_study_plans_for_academic_unit", "host": ["{{supabase_rest_url}}"], "path": ["rpc", "get_study_plans_for_academic_unit"] } }
+        },
+        {
+          "name": "Consultar períodos académicos",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status code is 200', function () { pm.response.to.have.status(200); });", "var data = pm.response.json();", "pm.test('Período configurado está presente', function () { pm.expect(data.some(t => t.id === Number(pm.environment.get('academic_term_id')))).to.equal(true); });"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }], "body": { "mode": "raw", "raw": "{}" }, "url": { "raw": "{{supabase_rest_url}}/rpc/get_active_academic_terms", "host": ["{{supabase_rest_url}}"], "path": ["rpc", "get_active_academic_terms"] } }
+        }
+      ]
+    },
+    {
+      "name": "03 Horarios guardados",
+      "item": [
+        {
+          "name": "Consultar cursos y grupos disponibles",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status code is 200', function () { pm.response.to.have.status(200); });", "var data = pm.response.json();", "pm.test('Lista de cursos no vacía', function () { pm.expect(data).to.be.an('array').that.is.not.empty; });", "var course = data.find(c => Array.isArray(c.groups) && c.groups.length > 0);", "pm.test('Existe al menos un grupo disponible', function () { pm.expect(course).to.not.equal(undefined); });", "pm.environment.set('course_code', course.course_code);", "pm.environment.set('group_code', course.groups[0].group_code);", "pm.environment.set('selected_campus_id', course.groups[0].campus_id || course.campus_id);", "pm.test('Contrato de curso y grupo', function () { pm.expect(course).to.have.keys(['offering_id','course_id','course_code','course_name','credits','weekly_hours','course_type','academic_unit_id','academic_unit_name','campus_id','academic_term_id','term_display_name','level_number','level_label','sort_order','groups']); pm.expect(course.groups[0]).to.have.property('group_code'); });"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }], "body": { "mode": "raw", "raw": "{\n  \"p_user_id\": null,\n  \"p_academic_term_id\": {{academic_term_id}},\n  \"p_campus_id\": {{campus_id}},\n  \"p_study_plan_id\": {{study_plan_id}},\n  \"p_academic_unit_id\": {{career_id}},\n  \"p_include_other_campuses\": false,\n  \"p_show_all_courses\": true\n}" }, "url": { "raw": "{{supabase_rest_url}}/rpc/get_schedule_courses", "host": ["{{supabase_rest_url}}"], "path": ["rpc", "get_schedule_courses"] } }
+        },
+        {
+          "name": "Guardar horario válido",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status code is 200', function () { pm.response.to.have.status(200); });", "var data = pm.response.json();", "pm.test('Horario guardado tiene id', function () { pm.expect(data).to.be.an('array').with.lengthOf(1); pm.expect(data[0].id).to.be.a('number'); });", "pm.environment.set('saved_schedule_id', data[0].id);"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }], "body": { "mode": "raw", "raw": "{\n  \"p_name\": \"Postman QA {{$timestamp}}\",\n  \"p_academic_term_id\": {{academic_term_id}},\n  \"p_group_lookups\": [\n    {\n      \"courseCode\": \"{{course_code}}\",\n      \"campusId\": {{selected_campus_id}},\n      \"groupCode\": \"{{group_code}}\"\n    }\n  ]\n}" }, "url": { "raw": "{{supabase_rest_url}}/rpc/save_user_schedule", "host": ["{{supabase_rest_url}}"], "path": ["rpc", "save_user_schedule"] } }
+        },
+        {
+          "name": "Consultar horario guardado",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status code is 200', function () { pm.response.to.have.status(200); });", "var data = pm.response.json();", "pm.test('Horario persiste', function () { pm.expect(data).to.be.an('array').with.lengthOf(1); pm.expect(data[0].id).to.equal(Number(pm.environment.get('saved_schedule_id'))); });"] } }],
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }], "url": { "raw": "{{supabase_rest_url}}/saved_schedule?select=*&id=eq.{{saved_schedule_id}}", "host": ["{{supabase_rest_url}}"], "path": ["saved_schedule"], "query": [{ "key": "select", "value": "*" }, { "key": "id", "value": "eq.{{saved_schedule_id}}" }] } }
+        },
+        {
+          "name": "Consultar grupos del horario guardado",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status code is 200', function () { pm.response.to.have.status(200); });", "var data = pm.response.json();", "pm.test('Horario tiene grupos guardados', function () { pm.expect(data).to.be.an('array').that.is.not.empty; pm.expect(data[0]).to.have.keys(['course_code','campus_id','group_code']); });"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }], "body": { "mode": "raw", "raw": "{\n  \"p_saved_schedule_id\": {{saved_schedule_id}}\n}" }, "url": { "raw": "{{supabase_rest_url}}/rpc/get_user_saved_schedule_group_lookups", "host": ["{{supabase_rest_url}}"], "path": ["rpc", "get_user_saved_schedule_group_lookups"] } }
+        },
+        {
+          "name": "Eliminar horario guardado",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status code is 204 or 200', function () { pm.expect([200, 204]).to.include(pm.response.code); });"] } }],
+          "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }], "url": { "raw": "{{supabase_rest_url}}/saved_schedule?id=eq.{{saved_schedule_id}}", "host": ["{{supabase_rest_url}}"], "path": ["saved_schedule"], "query": [{ "key": "id", "value": "eq.{{saved_schedule_id}}" }] } }
+        },
+        {
+          "name": "Verificar eliminación de horario",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status code is 200', function () { pm.response.to.have.status(200); });", "var data = pm.response.json();", "pm.test('Horario eliminado no aparece en consulta', function () { pm.expect(data).to.be.an('array').that.is.empty; });"] } }],
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }], "url": { "raw": "{{supabase_rest_url}}/saved_schedule?select=id&id=eq.{{saved_schedule_id}}", "host": ["{{supabase_rest_url}}"], "path": ["saved_schedule"], "query": [{ "key": "select", "value": "id" }, { "key": "id", "value": "eq.{{saved_schedule_id}}" }] } }
+        }
+      ]
+    },
+    {
+      "name": "04 Pruebas negativas",
+      "item": [
+        {
+          "name": "Guardar horario sin autenticación",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Request is rejected', function () { pm.expect(pm.response.code).to.be.oneOf([401, 403, 404]); });"] } }],
+            "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{supabase_publishable_key}}" }], "body": { "mode": "raw", "raw": "{\n  \"p_name\": \"Sin autenticación\",\n  \"p_academic_term_id\": {{academic_term_id}},\n  \"p_group_lookups\": [\n    {\n      \"courseCode\": \"{{course_code}}\",\n      \"campusId\": {{selected_campus_id}},\n      \"groupCode\": \"{{group_code}}\"\n    }\n  ]\n}" }, "url": { "raw": "{{supabase_rest_url}}/rpc/save_user_schedule", "host": ["{{supabase_rest_url}}"], "path": ["rpc", "save_user_schedule"] } }
+        },
+        {
+          "name": "Guardar horario con nombre vacío",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status code is 400', function () { pm.response.to.have.status(400); });", "pm.test('Mensaje menciona nombre', function () { pm.expect(pm.response.text().toLowerCase()).to.include('nombre'); });"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }], "body": { "mode": "raw", "raw": "{\n  \"p_name\": \"   \",\n  \"p_academic_term_id\": {{academic_term_id}},\n  \"p_group_lookups\": [\n    {\n      \"courseCode\": \"{{course_code}}\",\n      \"campusId\": {{selected_campus_id}},\n      \"groupCode\": \"{{group_code}}\"\n    }\n  ]\n}" }, "url": { "raw": "{{supabase_rest_url}}/rpc/save_user_schedule", "host": ["{{supabase_rest_url}}"], "path": ["rpc", "save_user_schedule"] } }
+        },
+        {
+          "name": "Guardar horario con grupo inexistente",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status code is 400', function () { pm.response.to.have.status(400); });", "pm.test('Mensaje menciona grupos válidos', function () { pm.expect(pm.response.text().toLowerCase()).to.include('grupos validos'); });"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }], "body": { "mode": "raw", "raw": "{\n  \"p_name\": \"Grupo inexistente\",\n  \"p_academic_term_id\": {{academic_term_id}},\n  \"p_group_lookups\": [\n    {\n      \"courseCode\": \"NOEXISTE999\",\n      \"campusId\": {{campus_id}},\n      \"groupCode\": \"ZZ\"\n    }\n  ]\n}" }, "url": { "raw": "{{supabase_rest_url}}/rpc/save_user_schedule", "host": ["{{supabase_rest_url}}"], "path": ["rpc", "save_user_schedule"] } }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.11, pytest-9.0.3, pluggy-1.6.0 -- /home/mau/Dev/tec/qa/tarea07/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /home/mau/Dev/tec/qa/tarea07
+configfile: pyproject.toml
+collecting ... collected 9 items
+
+tests/test_api_integration.py::test_catalog_flow_contract PASSED         [ 11%]
+tests/test_api_integration.py::test_schedule_courses_contract_and_response_time PASSED [ 22%]
+tests/test_api_integration.py::test_insert_selected_groups_in_sqlite_and_calculate_totals PASSED [ 33%]
+tests/test_api_integration.py::test_save_schedule_and_load_group_lookups_persists_selection PASSED [ 44%]
+tests/test_api_integration.py::test_delete_saved_schedule_removes_it PASSED [ 55%]
+tests/test_api_integration.py::test_save_schedule_requires_authentication PASSED [ 66%]
+tests/test_api_integration.py::test_save_schedule_rejects_empty_name PASSED [ 77%]
+tests/test_api_integration.py::test_save_schedule_rejects_invalid_groups PASSED [ 88%]
+tests/test_api_integration.py::test_partial_invalid_groups_are_saved_as_current_behavior PASSED [100%]
+
+============================== 9 passed in 10.09s ==============================

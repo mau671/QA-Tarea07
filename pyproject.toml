@@ -1,0 +1,14 @@
+[project]
+name = "tarea07"
+version = "0.1.0"
+description = "Laboratorio de pruebas de integración para Claustrum con Supabase REST API"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "requests>=2.33.1",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+]
